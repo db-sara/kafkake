@@ -44,6 +44,10 @@ func (e *Exchanger) Handle(req *kafka.Message) (*kafka.Message, error) {
 	}
 	body, err := json.Marshal(Response)
 
+	if err != nil {
+		return nil, err
+	}
+
 	resp := kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &e.Client.ProducerTopic,

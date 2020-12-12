@@ -14,9 +14,9 @@ import (
 type State int
 
 const (
-	NotReady State = iota
-	Online
-	Offline
+	NotReady State = iota // NotReady indicates the client has not been initialized
+	Online                // Online indicates that the client is ready for communication
+	Offline               // Offline indicates that the client has been shut down
 )
 
 // ClientOption defines possible options that can be used to customize the client
