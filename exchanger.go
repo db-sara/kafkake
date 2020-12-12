@@ -7,7 +7,7 @@ import (
 )
 
 // Handler is a function that takes a specified object and creates a response
-type Handler func(interface{}) (*interface{}, error)
+type Handler func(interface{}) (interface{}, error)
 
 // Exchanger represents a request-response exchanger, handling requests and responses with the specified schemas
 type Exchanger struct {
