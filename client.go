@@ -14,9 +14,9 @@ import (
 type State int
 
 const (
-	NotReady State = iota // NotReady indicates the client has not been initialized
-	Online                // Online indicates that the client is ready for communication
-	Offline               // Offline indicates that the client has been shut down
+	notReady State = iota // notReady indicates the client has not been initialized
+	online                // online indicates that the client is ready for communication
+	offline               // offline indicates that the client has been shut down
 )
 
 // ClientOption defines possible options that can be used to customize the client
@@ -59,7 +59,7 @@ func WithNewExchanger(h Handler, reqSchema, respSchema interface{}) ClientOption
 
 // NewClient creates a new client object with the specified configuration and options
 func NewClient(config ClientConfig, requestTopic, responseTopic string, opts ...ClientOption) (*Client, error) {
-	c := Client{State: NotReady}
+	c := Client{State: notReady}
 
 	// Create Consumer instance
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
@@ -101,7 +101,7 @@ func NewClient(config ClientConfig, requestTopic, responseTopic string, opts ...
 	c.Producer = producer
 	c.ProducerTopic = responseTopic
 
-	c.State = Online
+	c.State = online
 
 	// Loop through each option
 	for _, opt := range opts {
@@ -113,7 +113,7 @@ func NewClient(config ClientConfig, requestTopic, responseTopic string, opts ...
 
 // ReadMessage waits for a message from the Kafka cluster to be received on the current request topic
 func (c *Client) ReadMessage(duration time.Duration) (*kafka.Message, error) {
-	if c.State != Online {
+	if c.State != online {
 		return nil, fmt.Errorf("client is not online")
 	}
 
@@ -141,7 +141,7 @@ func (c *Client) ReadMessage(duration time.Duration) (*kafka.Message, error) {
 
 // SendMessage sends a message from the Kafka cluster to be received on the current request topic
 func (c *Client) SendMessage(msg *kafka.Message) error {
-	if c.State != Online {
+	if c.State != online {
 		return fmt.Errorf("client is not online")
 	}
 
@@ -174,7 +174,7 @@ func (c *Client) SendMessage(msg *kafka.Message) error {
 
 // ExchangeMessage waits for a message and sends a message to the kafka cluster with the parameterized Exchanger
 func (c *Client) ExchangeMessage() error {
-	if c.State != Online {
+	if c.State != online {
 		return fmt.Errorf("client is not online")
 	} else if c.Exchanger == nil {
 		return fmt.Errorf("exchanger not available")
@@ -193,10 +193,10 @@ func (c *Client) ExchangeMessage() error {
 
 // Shutdown safely closes the client
 func (c *Client) Shutdown() error {
-	if c.State != Online {
+	if c.State != online {
 		return fmt.Errorf("client is not online")
 	}
-	c.State = Offline
+	c.State = offline
 	c.Producer.Close()
 	err := c.Consumer.Close()
 	return err
