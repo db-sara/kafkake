@@ -29,8 +29,6 @@ type ClientConfig struct {
 	SaslMechanisms   string
 	SaslUsername     string
 	SaslPassword     string
-	RequestTopic     string
-	ResponseTopic    string
 }
 
 // Client is the interface to interact with a kafka cluster
