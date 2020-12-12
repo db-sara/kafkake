@@ -130,6 +130,7 @@ func (c *Client) ReadMessage(duration time.Duration) (*kafka.Message, error) {
 			if err != nil {
 				continue
 			} else {
+				fmt.Println("Received message")
 				return msg, nil
 			}
 		}
@@ -166,6 +167,8 @@ func (c *Client) SendMessage(msg *kafka.Message) error {
 
 	// Wait for all messages to be delivered
 	c.Producer.Flush(15 * 1000)
+
+	fmt.Println("Sent message")
 
 	return nil
 }
