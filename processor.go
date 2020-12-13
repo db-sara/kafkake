@@ -14,22 +14,21 @@ import (
 type Handler func([]byte) ([]byte, error)
 
 type ProcessorConfig struct {
-	Handler          Handler
 	BootstrapServers string
 	SecurityProtocol string
 	SaslMechanisms   string
 	SaslUsername     string
 	SaslPassword     string
-	RequestTopic     string
-	ResponseTopic    string
 }
 
 type Processor struct {
 	ProcessorConfig
-	State     State
-	Consumer  *kafka.Consumer
-	Producers map[int32]*kafka.Producer
-
+	State         State
+	RequestTopic  string
+	ResponseTopic string
+	Consumer      *kafka.Consumer
+	Producers     map[int32]*kafka.Producer
+	Handler       Handler
 	MessageStates map[string]*MessageState
 }
 
@@ -107,20 +106,20 @@ func (p *Processor) groupRebalance(consumer *kafka.Consumer, event kafka.Event) 
 	return nil
 }
 
-func NewProcessor(config ProcessorConfig) (*Processor, error) {
+func NewProcessor(config ProcessorConfig, requestTopic, responseTopic string, handler Handler) (*Processor, error) {
 	p := Processor{ProcessorConfig: config}
 
 	// The per-partition producers are set up in groupRebalance
 	p.Producers = make(map[int32]*kafka.Producer)
 
 	consumerConfig := &kafka.ConfigMap{
-		"client.id":         fmt.Sprintf("go-%s-processor", config.RequestTopic),
+		"client.id":         fmt.Sprintf("go-%s-processor", requestTopic),
 		"bootstrap.servers": config.BootstrapServers,
 		"sasl.mechanisms":   config.SaslMechanisms,
 		"security.protocol": config.SecurityProtocol,
 		"sasl.username":     config.SaslUsername,
 		"sasl.password":     config.SaslPassword,
-		"group.id":          fmt.Sprintf("go-%s-group", config.RequestTopic),
+		"group.id":          fmt.Sprintf("go-%s-group", requestTopic),
 		"auto.offset.reset": "earliest",
 		// Consumer used for input to a transactional processor
 		// must have auto-commits disabled since offsets
@@ -135,10 +134,12 @@ func NewProcessor(config ProcessorConfig) (*Processor, error) {
 		return nil, err
 	}
 
-	err = p.Consumer.Subscribe(config.RequestTopic, p.groupRebalance)
+	err = p.Consumer.Subscribe(requestTopic, p.groupRebalance)
 	if err != nil {
 		return nil, err
 	}
+
+	p.ResponseTopic = responseTopic
 
 	p.MessageStates = make(map[string]*MessageState)
 
