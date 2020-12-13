@@ -6,19 +6,19 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-// Handler is a function that takes a specified object and creates a response
-type Handler func([]byte) ([]byte, error)
+// ClientHandler is a function that takes a specified object and creates a response
+type ClientHandler func([]byte) ([]byte, error)
 
 // Exchanger represents a request-response exchanger, handling requests and responses with the specified schemas
 type Exchanger struct {
 	Client         *Client
-	Handler        Handler
+	Handler        ClientHandler
 	RequestSchema  interface{}
 	ResponseSchema interface{}
 }
 
 // NewExchanger creates a new message exchanger for a client with a custom handler for messages
-func NewExchanger(c *Client, h Handler, reqSchema, respSchema interface{}) *Exchanger {
+func NewExchanger(c *Client, h ClientHandler, reqSchema, respSchema interface{}) *Exchanger {
 	return &Exchanger{
 		Client:         c,
 		Handler:        h,
