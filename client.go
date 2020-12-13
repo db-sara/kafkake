@@ -50,7 +50,7 @@ func WithExchanger(e *Exchanger) ClientOption {
 }
 
 // WithNewExchanger customizes the client to use a newly specified Exchanger
-func WithNewExchanger(h Handler, reqSchema, respSchema interface{}) ClientOption {
+func WithNewExchanger(h ClientHandler, reqSchema, respSchema interface{}) ClientOption {
 	return func(c *Client) {
 		c.Exchanger = NewExchanger(c, h, reqSchema, respSchema)
 	}

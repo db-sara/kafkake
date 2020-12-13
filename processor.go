@@ -2,7 +2,6 @@ package kafkake
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -52,12 +51,7 @@ type MessageState struct {
 
 	stopchan    chan struct{}
 	stoppedchan chan struct{}
-
-	lightState  map[string]string // Current light states, indexed by road
-	carsWaiting map[string]int    // Numbers of cars waiting, indexed by road
-	carCnt      int               // Total number of cars waiting
-	currGreen   string            // Currently green road
-	lastChange  time.Time         // Time of last light change
+	lastChange  time.Time // Time of last light change
 }
 
 // groupRebalance is triggered on consumer rebalance.
@@ -354,18 +348,20 @@ func (p *Processor) intersectionStateMachine(msgState *MessageState) bool {
 		msgState.lastChange = time.Now()
 
 		go func(msgState *MessageState) { // work in background
-			// close the stoppedchan when this func
-			// exits
+			// close the stoppedchan when this func exits
 			defer close(msgState.stoppedchan)
 
-			// TODO: do setup work
-			defer func() {
-				// TODO: do teardown work
-			}()
 			for {
 				select {
 				default:
-					// TODO: do a bit of the work
+					resp, err := p.Handler(msgState.req)
+					if err != nil {
+						msgState.status = errored
+					} else {
+						msgState.resp = resp
+						msgState.status = recieved
+						msgState.lastChange = time.Now()
+					}
 				case <-msgState.stopchan:
 					// stop
 					return
@@ -379,19 +375,14 @@ func (p *Processor) intersectionStateMachine(msgState *MessageState) bool {
 		msgState.status = errored
 		msgState.lastChange = time.Now()
 	} else if msgState.status == recieved {
-		value, err := json.Marshal(isectMsg)
-		if err != nil {
-			glog.Fatal(err)
-		}
-
-		err = producer.Produce(
+		err := producer.Produce(
 			&kafka.Message{
 				TopicPartition: kafka.TopicPartition{
 					Topic:     &p.ResponseTopic,
 					Partition: kafka.PartitionAny,
 				},
 				Key:   []byte(msgState.key),
-				Value: value,
+				Value: msgState.resp,
 			}, nil)
 
 		if err != nil {
