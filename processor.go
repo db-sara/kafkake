@@ -263,7 +263,7 @@ func (p *Processor) getMessageState(key string, req []byte, partition int32) *Me
 }
 
 func (p *Processor) processIngressMessage(msg *kafka.Message) {
-	if msg.Key == nil || msg.Value == nil {
+	if msg.Value == nil {
 		// Invalid message, ignore
 		return
 	}
