@@ -14,6 +14,7 @@ import (
 type Handler func([]byte) ([]byte, error)
 
 type ProcessorConfig struct {
+	Handler          Handler
 	BootstrapServers string
 	SecurityProtocol string
 	SaslMechanisms   string
@@ -26,7 +27,6 @@ type ProcessorConfig struct {
 type Processor struct {
 	ProcessorConfig
 	State     State
-	Handler   Handler
 	Consumer  *kafka.Consumer
 	Producers map[int32]*kafka.Producer
 
