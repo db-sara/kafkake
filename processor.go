@@ -134,6 +134,9 @@ func NewProcessor(config ProcessorConfig, requestTopic, responseTopic string, ha
 		return nil, err
 	}
 
+	p.Handler = handler
+
+	p.RequestTopic = requestTopic
 	p.ResponseTopic = responseTopic
 
 	p.MessageStates = make(map[string]*MessageState)
