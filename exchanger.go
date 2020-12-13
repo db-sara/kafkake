@@ -1,13 +1,13 @@
 package kafkake
 
 import (
-	"encoding/json"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"time"
+
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 // Handler is a function that takes a specified object and creates a response
-type Handler func(interface{}) (interface{}, error)
+type Handler func([]byte) ([]byte, error)
 
 // Exchanger represents a request-response exchanger, handling requests and responses with the specified schemas
 type Exchanger struct {
@@ -29,20 +29,7 @@ func NewExchanger(c *Client, h Handler, reqSchema, respSchema interface{}) *Exch
 
 // Handle produces a kafka response message from a kafka request message
 func (e *Exchanger) Handle(req *kafka.Message) (*kafka.Message, error) {
-	var Request = e.RequestSchema
-	err := json.Unmarshal(req.Value, &Request)
-	if err != nil {
-		return nil, err
-	}
-
-	var Response interface{}
-	Response, err = e.Handler(Request)
-	if err != nil {
-		Response = Error{
-			Message: err,
-		}
-	}
-	body, err := json.Marshal(Response)
+	body, err := e.Handler(req.Value)
 
 	if err != nil {
 		return nil, err

@@ -2,12 +2,13 @@ package kafkake
 
 import (
 	"fmt"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 // State represents the current state of the Kafkake client
@@ -123,7 +124,7 @@ func (c *Client) ReadMessage(duration time.Duration) (*kafka.Message, error) {
 	for run {
 		select {
 		case sig := <-sigChan:
-			err = fmt.Errorf("caught signal %v: terminating\n", sig)
+			err = fmt.Errorf("caught signal %v: terminating", sig)
 			run = false
 		default:
 			msg, err := c.Consumer.ReadMessage(duration)
