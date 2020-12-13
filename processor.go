@@ -8,6 +8,7 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/glog"
+	"github.com/google/uuid"
 )
 
 type Handler func([]byte) ([]byte, error)
@@ -266,6 +267,10 @@ func (p *Processor) processIngressMessage(msg *kafka.Message) {
 	if msg.Value == nil {
 		// Invalid message, ignore
 		return
+	}
+
+	if msg.Key == nil {
+		msg.Key = []byte(uuid.New().String())
 	}
 
 	key := string(msg.Key)
