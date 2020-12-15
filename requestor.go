@@ -55,7 +55,7 @@ func NewRequestor(config KafkakeConfig, requestTopic, responseTopic string) (*Re
 	}
 
 	// Subscribe to topic
-	err = consumer.SubscribeTopics([]string{requestTopic}, nil)
+	err = consumer.SubscribeTopics([]string{responseTopic}, nil)
 
 	if err != nil {
 		return nil, err
