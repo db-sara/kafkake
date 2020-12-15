@@ -38,7 +38,7 @@ type MessageStatus int
 const (
 	ready MessageStatus = iota
 	delivered
-	recieved
+	processed
 	errored
 	done
 )
@@ -367,7 +367,7 @@ func (p *Processor) intersectionStateMachine(msgState *MessageState) bool {
 						msgState.status = errored
 					} else {
 						msgState.resp = resp
-						msgState.status = recieved
+						msgState.status = processed
 						msgState.lastChange = time.Now()
 					}
 				case <-msgState.stopchan:
@@ -382,7 +382,7 @@ func (p *Processor) intersectionStateMachine(msgState *MessageState) bool {
 
 		msgState.status = errored
 		msgState.lastChange = time.Now()
-	} else if msgState.status == recieved {
+	} else if msgState.status == processed {
 		err := producer.Produce(
 			&kafka.Message{
 				TopicPartition: kafka.TopicPartition{
