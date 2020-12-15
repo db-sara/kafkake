@@ -95,6 +95,7 @@ func (r *Requestor) Consume(duration time.Duration) {
 			if err != nil {
 				continue
 			} else {
+				glog.Info("Recieved message with key: %s and value %s", string(msg.Key), string(msg.Value))
 				r.KeyCache.Set(string(msg.Key), recieved, cache.DefaultExpiration)
 				r.ValueCache.Set(string(msg.Key), msg, cache.DefaultExpiration)
 			}
