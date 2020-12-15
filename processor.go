@@ -401,6 +401,25 @@ func (p *Processor) intersectionStateMachine(msgState *MessageState) bool {
 		msgState.lastChange = time.Now()
 
 		changed = true
+	} else if msgState.status == errored {
+		err := producer.Produce(
+			&kafka.Message{
+				TopicPartition: kafka.TopicPartition{
+					Topic:     &p.ResponseTopic,
+					Partition: kafka.PartitionAny,
+				},
+				Key:   []byte(msgState.key),
+				Value: []byte("handler timed out"),
+			}, nil)
+
+		if err != nil {
+			glog.Fatalf("Failed to produce message: %v", err)
+		}
+
+		msgState.status = done
+		msgState.lastChange = time.Now()
+
+		changed = true
 	}
 
 	return changed
