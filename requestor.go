@@ -133,7 +133,7 @@ func (r *Requestor) Request(msg *kafka.Message) {
 
 func (r *Requestor) Collect(msg *kafka.Message) (*kafka.Message, error) {
 	timeout := time.After(5 * time.Second)
-	tick := time.Tick(500 * time.Millisecond)
+	tick := time.Tick(10 * time.Millisecond)
 	// Keep trying until we're timed out or got a result or got an error
 	for {
 		select {
@@ -145,7 +145,8 @@ func (r *Requestor) Collect(msg *kafka.Message) (*kafka.Message, error) {
 			key := string(msg.Key)
 			resp, found := r.KeyCache.Get(key)
 			if found {
-				if resp == recieved {
+				status, ok := resp.(CacheState)
+				if ok && status == recieved {
 					for i := 0; i < 10; i++ {
 						response, found := r.ValueCache.Get(key)
 
