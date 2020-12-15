@@ -119,6 +119,7 @@ func (r *Requestor) Request(msg *kafka.Message) {
 		}
 	}()
 
+	r.KeyCache.Set(string(msg.Key), requested, cache.DefaultExpiration)
 	err := r.Producer.Produce(msg, nil)
 	if err != nil {
 		glog.Error(err)
@@ -127,8 +128,6 @@ func (r *Requestor) Request(msg *kafka.Message) {
 
 	// Wait for all messages to be delivered
 	r.Producer.Flush(15 * 1000)
-
-	r.KeyCache.Set(string(msg.Key), requested, cache.DefaultExpiration)
 }
 
 func (r *Requestor) Collect(msg *kafka.Message) (*kafka.Message, error) {
