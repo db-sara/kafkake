@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/golang/glog"
 	"github.com/patrickmn/go-cache"
 )
 
@@ -120,6 +121,7 @@ func (r *Requestor) Request(msg *kafka.Message) {
 
 	err := r.Producer.Produce(msg, nil)
 	if err != nil {
+		glog.Error(err)
 		return
 	}
 
